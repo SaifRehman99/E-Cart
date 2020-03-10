@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <%- include('../partials/head') %>
+</head>
+
+<body>
+    <%- include('../partials/navbar') %>
+
+        <div class="container my-5 py-5">
+            <% if (product.length > 0) { %>
+                <div class="row ">
+                    <% product.forEach(function (item) { %>
+                        <div class="col-md-4 col-sm-12 col-lg-4">
+                            <div class="card" style="width: 18rem;">
+                                <img src="imgs/computers-cup-desk-gadgets-221011.jpg" class="card-img-top" />
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <%= item.title %>
+                                            <p class="ml-auto">
+                                                <%= item.price %>
+                                            </p>
+                                    </h5>
+                                    <p class="card-text">
+                                        <%= item.description %>
+                                    </p>
+                                    <div class="text-center">
+                                        <a href="/details/<%=item.id%>" class="btn btn-primary">Details</a
+                >
+                <form action="/addtocart/<%= item.id %>" method="POST">
+                  <button class="btn btn-primary" type="submit">
+                    Add To Cart
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <%})%>
+      </div>
+
+      <% } else { %>
+      <h1>No Product Found..</h1>
+      <% } %>
+    </div>
+  </body>
+
+  <%- include('../partials/footer') %>
+</html>
