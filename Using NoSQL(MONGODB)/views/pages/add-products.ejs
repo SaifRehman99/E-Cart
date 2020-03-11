@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <%- include('../partials/head') %>
+</head>
+
+<body>
+    <%- include('../partials/navbar') %>
+
+        <form action="/add-products" method="POST" class="container py-5 my-5">
+            <div class="form-group">
+                <label for="exampleInputEmail1">Title</label>
+                <input type="text" class="form-control" placeholder="Enter Title.." name="title" />
+            </div>
+            <div class="form-group">
+                <label for="exampleInputPassword1">Description</label>
+                <input type="text" class="form-control" placeholder="Enter Description" name="description" />
+            </div>
+            <div class="form-group">
+                <label for="exampleInputPassword1">Image</label>
+                <input type="text" class="form-control" placeholder="Enter Image" name="imageURL" />
+            </div>
+            <div class="form-group">
+                <label for="exampleInputPassword1">Price</label>
+                <input type="number" class="form-control" placeholder="Enter Price" name="price" />
+            </div>
+
+            <button type="submit" class="btn btn-primary text-center">Submit</button>
+        </form>
+</body>
+
+<%- include('../partials/footer') %>
+
+</html>

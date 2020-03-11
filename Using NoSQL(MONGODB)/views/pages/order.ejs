@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <%- include('../partials/head') %>
+</head>
+
+<body>
+    <%- include('../partials/navbar') %>
+        <% if(orders.length > 0){%>
+            <div class="row container py-y my-5 text-center">
+                <%orders.forEach(function(orderData){ %>
+                    <div class="col-md-10">
+                        <div class="card">
+                            <div class="card-header">
+                                <%=orderData._id%>
+                            </div>
+                            <%orderData.products.forEach(function(p){%>
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        Title:
+                                        <%=p.product.title%>
+                                            Description:
+                                            <%=p.product.description%>
+                                                Price:
+                                                <%=p.product.price%>
+                                                    Quantity:
+                                                    <%=p.quantity %>
+                                    </h5>
+                                </div>
+
+                                <%})%>
+
+                        </div>
+                    </div>
+                    <% }) %>
+                        <% }else { %>
+                            <h2>NO Items in ORDER</h2>
+                            <% } %>
+            </div>
+</body>
+
+<%- include('../partials/footer') %>
+
+</html>
