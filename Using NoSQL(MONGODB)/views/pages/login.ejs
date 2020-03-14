@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <%- include('../partials/head') %>
+</head>
+
+<body>
+    <%- include('../partials/navbar') %>
+
+        <form action="/login" method="POST" class="container py-5 my-5">
+            <div class="form-group">
+                <label for="exampleInputEmail1">Name</label>
+                <input type="text" class="form-control" placeholder="Enter Name" name="name" />
+            </div>
+            <div class="form-group">
+                <label for="exampleInputPassword1">Password</label>
+                <input type="password" class="form-control" placeholder="Enter Password" name="password" />
+            </div>
+
+            <button type="submit" class="btn btn-primary text-center">Login</button>
+        </form>
+</body>
+
+<%- include('../partials/footer') %>
+
+</html>
