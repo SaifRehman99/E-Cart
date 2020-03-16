@@ -1,14 +1,14 @@
 const router = require("express").Router();
 const Product = require("../Models/products");
 const Order = require("../Models/order");
+const isAuth = require("../middleware/isAuth");
 
 router.get("/", (req, res) => {
     Product.find()
         .then(products => {
             res.render("pages/index", {
                 product: products,
-                path: "/",
-                isLog: req.session.loggedin
+                path: "/"
             });
         })
         .catch(err => console.log(err));
@@ -16,13 +16,12 @@ router.get("/", (req, res) => {
 
 router
     .route("/add-products")
-    .get((req, res) => {
+    .get(isAuth, (req, res) => {
         res.render("pages/add-products", {
-            path: "/add-products",
-            isLog: req.session.loggedin
+            path: "/add-products"
         });
     })
-    .post(async(req, res) => {
+    .post(isAuth, async(req, res) => {
         // validation here
         if (!req.body.title ||
             !req.body.description ||
@@ -48,31 +47,29 @@ router
         }
     });
 
-router.get("/details/:id", (req, res) => {
+router.get("/details/:id", isAuth, (req, res) => {
     Product.findById(req.params.id)
         .then(product => {
             res.render("pages/product-details", {
-                product,
-                isLog: req.session.loggedin
+                product
             });
         })
         .catch(err => console.log(err));
 });
 
-router.get("/admin", (req, res) => {
+router.get("/admin", isAuth, (req, res) => {
     Product.find()
         .then(products => {
             res.render("pages/admin-products", {
                 product: products,
-                path: "/admin",
-                isLog: req.session.loggedin
+                path: "/admin"
             });
         })
         .catch(err => console.log(err));
 });
 
 router
-    .route("/productUpdate/:id")
+    .route("/productUpdate/:id", isAuth)
     .get(async(req, res) => {
         try {
             const prod = await Product.findById(req.params.id);
@@ -105,7 +102,7 @@ router
         }
     });
 
-router.get("/productDelete/:id", async(req, res) => {
+router.get("/productDelete/:id", isAuth, async(req, res) => {
     try {
         const prod = await Product.findById(req.params.id);
 
@@ -120,21 +117,20 @@ router.get("/productDelete/:id", async(req, res) => {
     }
 });
 
-router.get("/cart", (req, res) => {
+router.get("/cart", isAuth, (req, res) => {
     req.user
         .populate("cart.items.productID")
         .execPopulate()
         .then(user => {
             res.render("pages/cart", {
                 user: user.cart.items,
-                path: "/cart",
-                isLog: req.session.loggedin
+                path: "/cart"
             });
         })
         .catch(e => console.log(e));
 });
 
-router.post("/addtocart/:id", (req, res) => {
+router.post("/addtocart/:id", isAuth, (req, res) => {
     Product.findById(req.params.id)
         .then(product => {
             return req.user.addCart(product);
@@ -142,10 +138,11 @@ router.post("/addtocart/:id", (req, res) => {
         .then(result => {
             res.redirect("/cart");
         })
-        .catch(e => console.log(e));
+
+    .catch(e => console.log(e));
 });
 
-router.post("/cartDelete/:id", (req, res) => {
+router.post("/cartDelete/:id", isAuth, (req, res) => {
     req.user
         .removeCart(req.params.id)
         .then(result => res.redirect("/cart"))
@@ -153,14 +150,13 @@ router.post("/cartDelete/:id", (req, res) => {
 });
 
 router
-    .route("/order")
+    .route("/order", isAuth)
     .get((req, res) => {
         Order.find()
             .then(orders => {
                 res.render("pages/order", {
                     orders,
-                    path: "/order",
-                    isLog: req.session.loggedin
+                    path: "/order"
                 });
             })
             .catch(e => console.log(e));
@@ -178,7 +174,7 @@ router
                 });
                 return Order.create({
                         user: {
-                            name: req.user.name,
+                            email: req.user.email,
                             userID: req.user
                         },
                         products: userData

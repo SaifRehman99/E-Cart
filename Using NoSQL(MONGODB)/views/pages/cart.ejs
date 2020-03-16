@@ -22,16 +22,17 @@
                                     <%= userCart.quantity %>
                                 </h5>
                                 <form action="/cartDelete/<%=userCart.productID._id%>" method="POST">
+                                    <input type="hidden" name="_csrf" value="<%=csrf%>" />
                                     <button type="submit" class="btn btn-danger">Delete</button>
                                 </form>
                             </div>
                         </div>
-
                     </div>
                 </div>
 
                 <% }) %>
                     <form action="/order" method="POST">
+                        <input type="hidden" name="_csrf" value="<%=csrf%>" />
                         <button type="submit" class="btn btn-success">Checkout</button>
                     </form>
                     <% }else { %>

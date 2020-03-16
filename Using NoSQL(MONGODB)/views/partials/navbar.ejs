@@ -16,12 +16,11 @@
                     <a class="nav-link" href="/add-products">Add Products</a>
                 </li>
                 <li class="nav-item ">
-                    <a class="nav-link <%=path === '/cart' ? 'active' : '' %>" href="/cart">Cart</a
-        >
-      </li>
+                    <a class="nav-link" href="/cart">Cart</a>
+                </li>
 
-      <li class="nav-item ">
-        <a class="nav-link" href="/order">Order</a>
+                <li class="nav-item ">
+                    <a class="nav-link" href="/order">Order</a>
                 </li>
                 <li class="nav-item ">
                     <a class="nav-link" href="/admin">Admin</a>
@@ -42,6 +41,7 @@
                 <% } else{ %>
                     <li class="nav-item">
                         <form action="/logout" method="POST">
+                            <input type="hidden" name="_csrf" value="<%=csrf%>" />
                             <button type="submit" href="/logout">
             Logout <i class="fas fa-users"></i>
           </button>

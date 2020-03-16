@@ -10,14 +10,15 @@
 
         <form action="/login" method="POST" class="container py-5 my-5">
             <div class="form-group">
-                <label for="exampleInputEmail1">Name</label>
-                <input type="text" class="form-control" placeholder="Enter Name" name="name" />
+                <label for="exampleInputEmail1">Email</label>
+                <input type="email" class="form-control" placeholder="Enter Email" name="email" />
             </div>
             <div class="form-group">
                 <label for="exampleInputPassword1">Password</label>
                 <input type="password" class="form-control" placeholder="Enter Password" name="password" />
             </div>
 
+            <input type="hidden" name="_csrf" value="<%=csrf%>" />
             <button type="submit" class="btn btn-primary text-center">Login</button>
         </form>
 </body>

@@ -27,6 +27,8 @@
                 <input type="number" class="form-control" placeholder="Enter Price" name="price" value="<%= prod.price %>" />
             </div>
 
+
+            <input type='hidden' name="_csrf" value="<%=csrf%>">
             <button type="submit" class="btn btn-primary text-center">Submit</button>
         </form>
 </body>

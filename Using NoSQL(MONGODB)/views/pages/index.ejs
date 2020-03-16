@@ -29,6 +29,7 @@
                                         <a href="/details/<%=item.id%>" class="btn btn-primary">Details</a
                 >
                 <form action="/addtocart/<%= item.id %>" method="POST">
+                  <input type="hidden" name="_csrf" value="<%=csrf%>" />
                   <button class="btn btn-primary" type="submit">
                     Add To Cart
                   </button>
