@@ -8,6 +8,7 @@ const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
 const connect = require("./config/db");
 const csrf = require("csurf");
+const flash = require("connect-flash");
 
 const csrfProtection = csrf();
 
@@ -34,6 +35,9 @@ app.use(
     })
 );
 
+// using flash after session
+app.use(flash());
+
 app.use(csrfProtection);
 
 app.use((req, res, next) => {
@@ -53,6 +57,8 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
     res.locals.isLog = req.session.loggedin;
     res.locals.csrf = req.csrfToken();
+    res.locals.error = req.flash("error");
+    res.locals.success = req.flash("success");
     next();
 });
 
