@@ -7,26 +7,37 @@
 
 <body>
     <%- include('../partials/navbar') %>
+        <%-
+    include('../partials/validationError') %>
 
-        <form action="/register" method="POST" class="container py-5 my-5">
-            <div class="form-group">
-                <label for="exampleInputEmail1">Email</label>
-                <input type="email" class="form-control" placeholder="Enter Email" name="email" />
-            </div>
-            <div class="form-group">
-                <label for="exampleInputPassword1">Password</label>
-                <input type="password" class="form-control" placeholder="Enter Password" name="password" />
-            </div>
-            <div class="form-group">
-                <label for="exampleInputPassword1">Confirm Password</label>
-                <input type="password" class="form-control" placeholder="Confirm Password" name="Cpassword" />
-            </div>
+            <form action="/register" method="POST" class="container py-5 my-5" novalidate>
+                <div class="form-group">
+                    <label for="exampleInputEmail1">Email</label>
+                    <input type="email" class="form-control <%=err.find(e=> e.param === 'email') ? 'is-invalid' : '' %>" placeholder="Enter Email" name="email" value="<%= email ? email : '' %>" />
+                    <div class="invalid-feedback">
+                        Please provide a valid Email
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="exampleInputPassword1">Password</label>
+                    <input type="password" class="form-control <%=err.find(e=> e.param === 'password') ? 'is-invalid' : '' %>" placeholder="Enter Password" name="password" value="<%= password ? password : '' %>" />
+                    <div class="invalid-feedback">
+                        Please provide a valid Password
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="exampleInputPassword1">Confirm Password</label>
+                    <input type="password" class="form-control <%=err.find(e=> e.param === 'Cpassword') ? 'is-invalid' : '' %>" placeholder="Confirm Password" name="Cpassword" value="<%= Cpassword ? Cpassword : '' %>" />
+                    <div class="invalid-feedback">
+                        Password Doesnt Match
+                    </div>
+                </div>
 
-            <input type="hidden" name="_csrf" value="<%=csrf%>" />
-            <button type="submit" class="btn btn-primary text-center">
+                <input type="hidden" name="_csrf" value="<%=csrf%>" />
+                <button type="submit" class="btn btn-primary text-center">
         Register
       </button>
-        </form>
+            </form>
 </body>
 
 <%- include('../partials/footer') %>

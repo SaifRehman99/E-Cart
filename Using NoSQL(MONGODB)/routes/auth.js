@@ -3,6 +3,10 @@ const User = require("../Models/User");
 const bcryptjs = require("bcryptjs");
 const isLogin = require("../middleware/isLog");
 const nodemailer = require("nodemailer");
+const crypto = require("crypto");
+
+// for server side validation
+const { check, body, validationResult } = require("express-validator");
 
 // this is using google setting > security ? app password
 let transporter = nodemailer.createTransport({
@@ -25,92 +29,169 @@ router
 
         res.render("pages/login", {
             path: "/login",
-            isLog: false
+            isLog: false,
+            err: [],
+            email: "",
+            password: ""
         });
     })
-    .post((req, res) => {
-        // setting the cookie header here
-        // res.setHeader('Set-Cookie', 'loggedIn=true; HttpOnly');
+    .post(
+        check("email")
+        .isEmail()
+        .withMessage("Please Enter a valid Email")
+        .normalizeEmail(),
+        body("password", "Please enter password aleast 5 with aplha numeric")
+        .isLength({ min: 5 })
+        .isAlphanumeric()
+        .trim(),
+        (req, res) => {
+            // sending the request here for errors
+            const errors = validationResult(req);
 
-        User.findOne({ email: req.body.email })
-            .then(user => {
-                if (!user) {
-                    req.flash("error", "No email Found");
-                    return res.redirect("/login");
-                }
-                bcryptjs.compare(req.body.password, user.password).then(Match => {
-                    if (Match) {
-                        req.flash("success", "Login Success");
-
-                        // setting session here
-                        req.session.loggedin = true;
-                        req.session.user = user;
-                        //optional to save the session proper
-                        return req.session.save(err => {
-                            res.redirect("/");
-                        });
-                    }
-                    req.flash("error", "Password Doesnt match");
-                    res.redirect("/login");
+            // checking if errors exist
+            if (!errors.isEmpty()) {
+                return res.render("pages/login", {
+                    path: "/login",
+                    isLog: false,
+                    err: errors.array(),
+                    email: req.body.email,
+                    password: req.body.password
                 });
-            })
-            .catch(e => console.log(e));
-    });
+            }
+
+            // setting the cookie header here
+            // res.setHeader('Set-Cookie', 'loggedIn=true; HttpOnly');
+
+            User.findOne({ email: req.body.email })
+                .then(user => {
+                    if (!user) {
+                        req.flash("error", "No email Found");
+                        return res.redirect("/login");
+                    }
+                    bcryptjs.compare(req.body.password, user.password).then(Match => {
+                        if (Match) {
+                            req.flash("success", "Login Success");
+
+                            // setting session here
+                            req.session.loggedin = true;
+                            req.session.user = user;
+                            //optional to save the session proper
+                            return req.session.save(err => {
+                                res.redirect("/");
+                            });
+                        }
+                        req.flash("error", "Password Doesnt match");
+                        res.redirect("/login");
+                    });
+                })
+                .catch(e => {
+                    //thorwing custom error here by express
+                    // return res.redirect("/500");
+
+                    const error = new Error(e);
+                    error.httpStatusCode = 500;
+                    return next(error);
+                });
+        }
+    );
 
 router
     .route("/register")
     .get(isLogin, (req, res) => {
         res.render("pages/register", {
             isLog: false,
-            path: "/register"
+            path: "/register",
+            err: [],
+            email: "",
+            password: "",
+            Cpassword: "",
+            validationInputLable: []
         });
     })
-    .post((req, res) => {
-        User.findOne({ email: req.body.email })
-            .then(user => {
-                if (user) {
-                    req.flash("error", "This is email is already registered");
-                    return res.redirect("/register");
-                }
+    .post(
+        check("email")
+        .isEmail()
+        .withMessage("Please Enter a valid Email")
+        .normalizeEmail(),
+        body("password", "Please enter password aleast 5 with aplha numeric")
+        .isLength({ min: 5 })
+        .isAlphanumeric()
+        .trim(),
 
-                return bcryptjs
-                    .hash(req.body.password, 12)
-                    .then(hashedPass => {
-                        return User.create({
-                            email: req.body.email,
-                            password: hashedPass,
-                            cart: { items: [] }
+        // using custom validator here for password check
+        body("Cpassword")
+        .trim()
+        .custom((value, { req }) => {
+            if (value !== req.body.password) {
+                throw new Error("Password Doest Match");
+            }
+            return true;
+        }),
+        (req, res) => {
+            // sending the request here for errors
+            const errors = validationResult(req);
+
+            // checking if errors exist
+            if (!errors.isEmpty()) {
+                return res.render("pages/register", {
+                    err: errors.array(),
+                    email: req.body.email,
+                    password: req.body.password,
+                    Cpassword: req.body.Cpassword
+                });
+            }
+
+            User.findOne({ email: req.body.email })
+                .then(user => {
+                    if (user) {
+                        req.flash("error", "This is email is already registered");
+                        return res.redirect("/register");
+                    }
+
+                    return bcryptjs
+                        .hash(req.body.password, 12)
+                        .then(hashedPass => {
+                            return User.create({
+                                email: req.body.email,
+                                password: hashedPass,
+                                cart: { items: [] }
+                            });
+                        })
+                        .then(USER => {
+                            // send mail with defined transport object
+                            let message = {
+                                from: ' "Saif Rehman" <saifr7493@gmail.com>',
+                                to: req.body.email,
+                                subject: "ECart",
+                                text: "Thankyou for registering",
+                                attachments: [{
+                                    filename: "two-macbook-pro-beside-gray-bowl-705675 (1).jpg",
+                                    path: "./two-macbook-pro-beside-gray-bowl-705675 (1).jpg"
+                                }]
+                            };
+
+                            transporter.sendMail(message, (err, info) => {
+                                if (err) {
+                                    return console.log(err);
+                                }
+                                console.log(info);
+                            });
+                            req.flash("success", "User registered");
+                            res.redirect("/login");
                         });
-                    })
-                    .then(USER => {
-                        // send mail with defined transport object
-                        let message = {
-                            from: ' "Saif Rehman" <saifr7493@gmail.com>',
-                            to: req.body.email,
-                            subject: "ECart",
-                            text: "Thankyou for registering",
-                            attachments: [{
-                                filename: "two-macbook-pro-beside-gray-bowl-705675 (1).jpg",
-                                path: "./two-macbook-pro-beside-gray-bowl-705675 (1).jpg"
-                            }]
-                        };
+                })
+                .catch(err => {
+                    req.flash("error", "Error");
 
-                        transporter.sendMail(message, (err, info) => {
-                            if (err) {
-                                return console.log(err);
-                            }
-                            console.log(info);
-                        });
-                        req.flash("success", "User registered");
-                        res.redirect("/login");
-                    });
-            })
-            .catch(err => {
-                req.flash("error", "Error");
+                    //thorwing custom error here by express
+                    // return res.redirect("/500");
 
-                res.redirect("/register");
-            });
-    });
+                    const error = new Error(e);
+                    error.httpStatusCode = 500;
+                    return next(error);
+                });
+        }
+    );
 
 // clearing the cookie of session here from server
 router.post("/logout", (req, res) => {
@@ -119,4 +200,120 @@ router.post("/logout", (req, res) => {
         res.redirect("/login");
     });
 });
+
+router
+    .route("/reset")
+    .get((req, res) => {
+        res.render("pages/reset", {
+            isLog: false
+        });
+    })
+    .post((req, res) => {
+        // creating token here
+        const token = crypto.randomBytes(20).toString("hex");
+
+        // hashing the token here
+        const HashedToken = crypto
+            .createHash("sha256")
+            .update(token)
+            .digest("hex");
+
+        if (!req.body.resetEmail) {
+            req.flash("error", "Enter Email First");
+            return res.redirect("/reset");
+        }
+
+        User.findOne({ email: req.body.resetEmail })
+            .then(user => {
+                if (!user) {
+                    req.flash("error", "No user found of that email");
+                    return res.redirect("/reset");
+                }
+                user.resetToken = HashedToken;
+                // setting the expiration data (10 MINS)
+                user.resetTokenExpiration = Date.now() + 10 * 60 * 1000;
+
+                return user.save();
+            })
+            .then(response => {
+                return transporter.sendMail({
+                    from: ' "Saif Rehman" <saifr7493@gmail.com>',
+                    to: req.body.resetEmail,
+                    subject: "Reset",
+                    html: `
+                    <p>Please follow the <a href="http://localhost:4765/reset/${token}">Link</a> to reset </p>
+                    `
+                });
+            })
+            .then(mail => {
+                req.flash("success", "reset Mail sent");
+                console.log(mail);
+                return res.redirect("/login");
+            })
+            .catch(err => {
+                console.log("Yahn hu me");
+
+                //thorwing custom error here by express
+                // return res.redirect("/500");
+
+                const error = new Error(e);
+                error.httpStatusCode = 500;
+                return next(error);
+            });
+    });
+
+router
+    .route("/reset/:token")
+    .get((req, res) => {
+        res.render("pages/resetPass", {
+            token: req.params.token
+        });
+    })
+    .post((req, res) => {
+        const token = req.params.token;
+        // reverting the token here
+        const decryptToken = crypto
+            .createHash("sha256")
+            .update(req.params.token)
+            .digest("hex");
+
+        User.findOne({
+                resetToken: decryptToken,
+                resetTokenExpiration: { $gt: Date.now() }
+            })
+            .then(user => {
+                if (!user) {
+                    req.flash("error", "Token Expires");
+                    return res.redirect("/reset");
+                }
+
+                if (!req.body.updatePassword) {
+                    req.flash("error", "Enter Password!");
+                    return res.redirect(`/reset/${token}`);
+                }
+
+                bcryptjs
+                    .hash(req.body.updatePassword, 12)
+                    .then(hashed => {
+                        user.password = hashed;
+                        user.resetToken = undefined;
+                        user.resetTokenExpiration = undefined;
+                        return user.save();
+                    })
+                    .then(Res => {
+                        req.flash("success", "Password Updated");
+                        return res.redirect("/login");
+                    });
+            })
+            .catch(e => {
+                //thorwing custom error here by express
+                // return res.redirect("/500");
+
+                //==================OR===================//
+                //inside of async code use next() to throw error IMP
+                const error = new Error(e);
+                error.httpStatusCode = 500;
+                return next(error);
+            });
+    });
 module.exports = router;

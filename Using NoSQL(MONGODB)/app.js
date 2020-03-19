@@ -9,6 +9,7 @@ const MongoDBStore = require("connect-mongodb-session")(session);
 const connect = require("./config/db");
 const csrf = require("csurf");
 const flash = require("connect-flash");
+const error = require("./middleware/error");
 
 const csrfProtection = csrf();
 
@@ -40,19 +41,6 @@ app.use(flash());
 
 app.use(csrfProtection);
 
-app.use((req, res, next) => {
-    // if user is logout
-    if (!req.session.user) {
-        return next();
-    }
-    User.findById(req.session.user._id)
-        .then(user => {
-            req.user = user;
-            next();
-        })
-        .catch(e => console.log("ok"));
-});
-
 // setting the locals var here
 app.use((req, res, next) => {
     res.locals.isLog = req.session.loggedin;
@@ -61,15 +49,33 @@ app.use((req, res, next) => {
     res.locals.success = req.flash("success");
     next();
 });
+//setting the token before do something on middleware
+
+app.use((req, res, next) => {
+    // if user is logout
+    if (!req.session.user) {
+        return next();
+    }
+    User.findById(req.session.user._id)
+        .then(user => {
+            if (!user) {
+                return next();
+            }
+            req.user = user;
+            next();
+        })
+        .catch(e => console.log("ok"));
+});
 
 app.use("/", require("./routes/shop"));
 app.use(require("./routes/auth"));
 
-app.use((req, res, next) => {
-    res.render("pages/404", {
-        isLog: req.session.loggedin
-    });
-    next();
+app.get("/500", error.get500);
+app.use(error.get404);
+
+// error middleware here
+app.use((error, req, res, next) => {
+    res.redirect("/500");
 });
 
 const PORT = 4765;

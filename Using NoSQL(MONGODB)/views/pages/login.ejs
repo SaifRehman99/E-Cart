@@ -7,20 +7,28 @@
 
 <body>
     <%- include('../partials/navbar') %>
+        <%include('../partials/validationError') %>
 
-        <form action="/login" method="POST" class="container py-5 my-5">
-            <div class="form-group">
-                <label for="exampleInputEmail1">Email</label>
-                <input type="email" class="form-control" placeholder="Enter Email" name="email" />
-            </div>
-            <div class="form-group">
-                <label for="exampleInputPassword1">Password</label>
-                <input type="password" class="form-control" placeholder="Enter Password" name="password" />
-            </div>
+            <form action="/login" method="POST" class="container py-5 my-5">
+                <div class="form-group">
+                    <label for="exampleInputEmail1">Email</label>
+                    <input type="email" class="form-control <%=err.find(e=> e.param === 'email') ? 'is-invalid' : '' %>" placeholder="Enter Email" name="email" value="<%= email ? email : '' %>" />
+                    <div class="invalid-feedback">
+                        Please provide a valid Email
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="exampleInputPassword1">Password</label>
+                    <input type="password" class="form-control <%=err.find(e=> e.param === 'email') ? 'is-invalid' : '' %>" placeholder="Enter Password" name="password" value="<%= password ? password : '' %>" />
+                    <div class="invalid-feedback">
+                        Please provide a valid Password
+                    </div>
+                </div>
 
-            <input type="hidden" name="_csrf" value="<%=csrf%>" />
-            <button type="submit" class="btn btn-primary text-center">Login</button>
-        </form>
+                <input type="hidden" name="_csrf" value="<%=csrf%>" />
+                <button type="submit" class="btn btn-primary text-center">Login</button>
+                <a href="/reset">Reset Password?</a>
+            </form>
 </body>
 
 <%- include('../partials/footer') %>

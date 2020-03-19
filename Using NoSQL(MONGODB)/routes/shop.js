@@ -39,6 +39,7 @@ router
 
             if (prod) {
                 console.log("Product Created");
+                req.flash("success", "Product Created!");
                 res.redirect("/");
             }
         } catch (error) {
@@ -58,7 +59,8 @@ router.get("/details/:id", isAuth, (req, res) => {
 });
 
 router.get("/admin", isAuth, (req, res) => {
-    Product.find()
+    // only logged user can view edit his product
+    Product.find({ userID: req.user._id })
         .then(products => {
             res.render("pages/admin-products", {
                 product: products,
@@ -73,9 +75,14 @@ router
     .get(async(req, res) => {
         try {
             const prod = await Product.findById(req.params.id);
+            if (prod.userID.toString() !== req.user._id.toString()) {
+                req.flash("error", "Not Authorized!");
+                return res.redirect("/login");
+            }
 
             if (!prod) {
-                return res.status(404).send("No Product Found");
+                req.flash("error", "Not authorized!");
+                return res.redirect("/login");
             }
             res.render("pages/edit-products", {
                 prod
@@ -87,6 +94,10 @@ router
     .post(async(req, res) => {
         try {
             const prod = await Product.findById(req.params.id);
+            if (prod.userID.toString() != req.user._id.toString()) {
+                req.flash("error", "Not Authorized!");
+                return res.redirect("/login");
+            }
 
             if (!prod) {
                 return res.status(404).send("No Product Found");
@@ -96,6 +107,9 @@ router
                 req.params.id,
                 req.body
             );
+
+            req.flash("success", "Product Updated!");
+
             res.redirect("/admin");
         } catch (e) {
             console.log(e);
@@ -106,12 +120,21 @@ router.get("/productDelete/:id", isAuth, async(req, res) => {
     try {
         const prod = await Product.findById(req.params.id);
 
+        if (prod.userID.toString() != req.user._id.toString()) {
+            req.flash("error", "Not Authorized!");
+            return res.redirect("/login");
+        }
+
         if (!prod) {
-            return res.status(404).send("No Product Found");
+            req.flash("error", "Not Authorized");
+            return res.redirect("/login");
         }
 
         const deleteProd = await Product.findByIdAndRemove(req.params.id);
-        res.redirect("/admin");
+        if (deleteProd) {
+            req.flash("success", "Product deleted!");
+            res.redirect("/admin");
+        }
     } catch (e) {
         console.log(e);
     }
@@ -122,6 +145,7 @@ router.get("/cart", isAuth, (req, res) => {
         .populate("cart.items.productID")
         .execPopulate()
         .then(user => {
+            console.log(user);
             res.render("pages/cart", {
                 user: user.cart.items,
                 path: "/cart"
@@ -136,6 +160,7 @@ router.post("/addtocart/:id", isAuth, (req, res) => {
             return req.user.addCart(product);
         })
         .then(result => {
+            req.flash("success", "Product Added to cart!");
             res.redirect("/cart");
         })
 
@@ -145,7 +170,11 @@ router.post("/addtocart/:id", isAuth, (req, res) => {
 router.post("/cartDelete/:id", isAuth, (req, res) => {
     req.user
         .removeCart(req.params.id)
-        .then(result => res.redirect("/cart"))
+        .then(result => {
+            req.flash("success", "Product Deleted!");
+
+            res.redirect("/cart");
+        })
         .catch(e => console.log(e));
 });
 
@@ -182,7 +211,11 @@ router
                     .then(result => {
                         return req.user.clearCart();
                     })
-                    .then(() => res.redirect("/order"));
+                    .then(() => {
+                        req.flash("success", "Product Ordered!!");
+
+                        res.redirect("/order");
+                    });
             })
             .catch(e => console.log(e));
     });

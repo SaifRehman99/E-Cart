@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <%- include('../partials/head') %>
+</head>
+
+<body>
+    <%- include('../partials/navbar') %>
+
+        <form action="/reset/<%=token%>" method="POST" class="container py-5 my-5">
+            <div class="form-group">
+                <label for="exampleInputPassword1">Update Password</label>
+                <input type="password" class="form-control" placeholder="Update Password" name="updatePassword" />
+            </div>
+
+            <input type="hidden" name="_csrf" value="<%=csrf%>" />
+            <button type="submit" class="btn btn-primary text-center">
+        Update Password
+      </button>
+        </form>
+</body>
+
+<%- include('../partials/footer') %>
+
+</html>

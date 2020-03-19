@@ -8,8 +8,11 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, "Enter Password"]
     },
+    resetToken: String,
+    resetTokenExpiration: String,
     cart: {
         items: [{
+            addedID: mongoose.Types.ObjectId,
             productID: {
                 type: mongoose.Types.ObjectId,
                 ref: "product",
@@ -41,6 +44,7 @@ userSchema.methods.addCart = function(product) {
     // else add the new product in cart
     else {
         updateCartItems.push({
+            addedID: this._id,
             productID: product._id,
             quantity: newQuantity
         });
