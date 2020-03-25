@@ -11,6 +11,7 @@
             <div class="row container py-y my-5 text-center">
                 <%orders.forEach(function(orderData){ %>
                     <div class="col-md-10">
+                        <a href="/order/<%=orderData._id%>">Invoice</a>
                         <div class="card">
                             <div class="card-header">
                                 <%=orderData._id%>

@@ -12,38 +12,43 @@
             <% if (product.length > 0) { %>
                 <div class="row ">
                     <% product.forEach(function (item) { %>
-                        <div class="col-md-4 col-sm-12 col-lg-4">
-                            <div class="card" style="width: 18rem;">
-                                <img src="imgs/computers-cup-desk-gadgets-221011.jpg" class="card-img-top" />
-                                <div class="card-body">
-                                    <h5 class="card-title">
-                                        <%= item.title %>
-                                            <p class="ml-auto">
-                                                <%= item.price %>
-                                            </p>
-                                    </h5>
-                                    <p class="card-text">
-                                        <%= item.description %>
-                                    </p>
-                                    <div class="text-center">
-                                        <a href="/productUpdate/<%=item.id%>" class="btn btn-primary">Edit</a
-                >
-                <a href="/productDelete/<%= item.id %>" class="btn btn-danger"
-                  >Delete</a
-                >
-              </div>
-            </div>
-          </div>
+                        <div class="col-md-4 col-sm-12 col-lg-4 completeCard">
+                            <article class="card" style="width: 18rem;">
+                                <img src="<%=item.image%>" class="card-img-top" />
+
+                                <h5 class="card-title">
+                                    <%= item.title %>
+                                        <p class="ml-auto">
+                                            <%= item.price %>
+                                        </p>
+                                </h5>
+                                <p class="card-text">
+                                    <%= item.description %>
+                                </p>
+
+                                <a href="/productUpdate/<%=item.id%>" class="btn btn-primary">Edit</a
+            >
+            <!-- for post request -->
+            <!-- <a href="/productDelete/<%= item.id %>"  class="btn btn-danger">Delete</a> -->
+                                <!-- for async client side request -->
+                                <input type="hidden" name="productID" value="<%=item.id%>" />
+                                <input type="hidden" name="_csrf" value="<%=csrf%>" />
+                                <button type="button" class="btn btn-danger" onclick="deleteProduct(this)">
+              Delete
+            </button>
+                            </article>
+                        </div>
+
+                        <%})%>
+                </div>
+
+                <% } else { %>
+                    <h1>No Product Found..</h1>
+                    <% } %>
         </div>
+</body>
 
-        <%})%>
-      </div>
+<%- include('../partials/footer') %>
+    <script src="/js/asyncDelete.js"></script>
 
-      <% } else { %>
-      <h1>No Product Found..</h1>
-      <% } %>
-    </div>
-  </body>
-
-  <%- include('../partials/footer') %>
 </html>

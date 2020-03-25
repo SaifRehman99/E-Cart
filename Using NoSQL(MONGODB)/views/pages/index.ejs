@@ -5,6 +5,12 @@
     <%- include('../partials/head') %>
 </head>
 
+<style>
+    .active {
+        background: blue;
+    }
+</style>
+
 <body>
     <%- include('../partials/navbar') %>
 
@@ -14,7 +20,7 @@
                     <% product.forEach(function (item) { %>
                         <div class="col-md-4 col-sm-12 col-lg-4">
                             <div class="card" style="width: 18rem;">
-                                <img src="imgs/computers-cup-desk-gadgets-221011.jpg" class="card-img-top" />
+                                <img src="<%=item.image%>" class="card-img-top" />
                                 <div class="card-body">
                                     <h5 class="card-title">
                                         <%= item.title %>
@@ -41,12 +47,38 @@
 
         <%})%>
       </div>
+      <div class="pagination">
+        <h1>
+          <%if(currentPage !== 1 && previousPage !==1){ %>
+          <a href="/?page=1" class="badge badge-info">1</a>
+                                        <%}%>
+                                            <%if(hasPreviousPage) { %>
+                                                <a href="/?page=<%=previousPage%>" class="badge badge-info">
+                                                    <%=previousPage%>
+                                                </a>
+                                                <%}%>
+                                                    <a href="/?page=<%=currentPage%>" class="badge badge-info active">
+                                                        <%=currentPage%>
+                                                    </a>
+                                                    <%if(hasNextPage) { %>
+                                                        <a href="/?page=<%=nextPage%>" class="badge badge-info">
+                                                            <%=nextPage%>
+                                                        </a>
+                                                        <%}%>
+                                                            <%if(lastPage !== currentPage && nextPage !== lastPage) {%>
+                                                                <a href="/?page=<%=lastPage%>" class="badge badge-info">
+                                                                    <%=lastPage%>
+                                                                </a>
+                                                                <%}%>
+                                                                    </h1>
+                                    </div>
 
-      <% } else { %>
-      <h1>No Product Found..</h1>
-      <% } %>
-    </div>
-  </body>
+                                    <% } else { %>
+                                        <h1>No Product Found..</h1>
+                                        <% } %>
+                                </div>
+</body>
 
-  <%- include('../partials/footer') %>
+<%- include('../partials/footer') %>
+
 </html>

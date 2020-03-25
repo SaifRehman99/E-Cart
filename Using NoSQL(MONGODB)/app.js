@@ -10,6 +10,7 @@ const connect = require("./config/db");
 const csrf = require("csurf");
 const flash = require("connect-flash");
 const error = require("./middleware/error");
+const multer = require("multer");
 
 const csrfProtection = csrf();
 
@@ -19,13 +20,50 @@ const store = new MongoDBStore({
     collection: "mySessions"
 });
 
+// file storage configuration
+//storage engine
+const fileStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, "Upload");
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + "-" + file.originalname);
+    }
+});
+
+// SETTING THE FILE FILTER HERE
+// Check File Type
+const checkFileType = (req, file, cb) => {
+    // Allowed ext
+    const filetypes = /jpeg|jpg|png|gif/;
+    // Check ext
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    // Check mime
+    const mimetype = filetypes.test(file.mimetype);
+
+    if (mimetype && extname) {
+        return cb(null, true);
+    } else {
+        cb("Error: Images Only!");
+    }
+};
+
 app.set("view engine", "ejs");
 app.set("views", "views");
 
 app.use(express.json());
+// using the multer middleware here
+// app.use(multer({ dest: "IMG" }).single("image"));
+app.use(
+    multer({
+        storage: fileStorage,
+        fileFilter: checkFileType
+    }).single("image")
+);
 app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static(path.join(__dirname, "public")));
+app.use("/Upload", express.static(path.join(__dirname, "Upload")));
 
 app.use(
     session({
